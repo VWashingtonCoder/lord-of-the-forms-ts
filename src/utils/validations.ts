@@ -3,3 +3,13 @@ export function isEmailValid(emailAddress: string) {
     const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     return !!emailAddress.match(regex);
 }
+
+export function isPhoneValid(phoneNumber: string) {
+    const regex = /^\d{7}$/;
+    return !!phoneNumber.match(regex);
+}
+
+export function containsNumbers(input: string) {
+    const regex = /\d/;
+    return !!input.match(regex);
+}
