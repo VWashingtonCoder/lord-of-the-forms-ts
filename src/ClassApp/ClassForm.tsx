@@ -3,7 +3,7 @@ import { ErrorMessage } from "../ErrorMessage";
 import { ClassTextInput } from "./components/ClassTextInput";
 import { ClassPhoneInput } from "./components/ClassPhoneInput";
 import { UserInformation, StringObject } from "../types";
-import { containsNumbers, containsLetters } from "../utils/validations";
+import { containsOnlyNumbers, containsOnlyLetters } from "../utils/validations";
 
 type FormProps = {
   updateUser: (newUser: UserInformation) => void;
@@ -73,7 +73,7 @@ export class ClassForm extends Component<FormProps, FormState> {
   ];
 
   changeTextValues = (key: string, value: string) => {
-    if (key !== "email" && containsNumbers(value)) {
+    if (key !== "email" && !containsOnlyLetters(value)) {
       return;
     }
 
@@ -88,7 +88,6 @@ export class ClassForm extends Component<FormProps, FormState> {
   changePhoneValues =
     (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
-      console.log("value", value);
       const lengths = [2, 2, 2, 1];
       const currentMaxLength = lengths[index];
       const nextInput = this.refGroup[index + 1];
@@ -99,11 +98,12 @@ export class ClassForm extends Component<FormProps, FormState> {
       const shouldFocusPreviousInput =
         value.length === 0 && previousInput?.current;
 
+      console.log("shouldFocusPreviousInput", shouldFocusPreviousInput);
       const newPhoneValues: PhoneValues = [...this.state.phoneValues];
       newPhoneValues[index] = value;
-      if (containsLetters(value)) return;
-
-      if (shouldFocusNextInput) {
+      if (!containsOnlyNumbers(value) && value.length > 0) {
+        return;
+      } else if (shouldFocusNextInput) {
         nextInput.current.focus();
       } else if (shouldFocusPreviousInput) {
         previousInput.current.focus();

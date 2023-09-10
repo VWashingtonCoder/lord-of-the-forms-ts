@@ -16,7 +16,7 @@ export class ClassApp extends Component<Record<string, never>, State> {
   state = { userInformation: defaultUser };
 
   updateUserInformation = (newUser: UserInformation) => {
-    console.log("newUser", newUser)
+    console.log("newUser", newUser);
     // this.setState({ userInformation: newUser });
   };
 

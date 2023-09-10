@@ -40,7 +40,7 @@ To get this project setup, you should:
 
 ## Standard Requirements
 
-- [ ] Setup eslint
+- [X] Setup eslint
 - [ ] Pass all linting checks
 
 - To check if linting passes, run `npm run lint`
@@ -94,12 +94,12 @@ Phone Number UI
 Phone Input
 
 - [ ] Create a `FunctionalPhoneInput` component to clean up code
-- [ ] Create a `ClassPhoneInput` component to clean up code
-- [ ] The telephone input should work EXACTLY like on the example site
-- [ ] Typing in the max characters on one input should move to the next input
-- [ ] Deleting should go to the previous input as necessary
-- [ ] Inputs should be tracked with a state that looks like this ["", "", "", ""]
-- [ ] A User cannot type any non-numeric characters into a telephone input
+- [X] Create a `ClassPhoneInput` component to clean up code
+- [X] The telephone input should work EXACTLY like on the example site
+- [X] Typing in the max characters on one input should move to the next input
+- [X] Deleting should go to the previous input as necessary
+- [X] Inputs should be tracked with a state that looks like this ["", "", "", ""]
+- [X] A User cannot type any non-numeric characters into a telephone input
 
 City Information
 
@@ -110,7 +110,7 @@ City Information
 Text Inputs
 
 - [ ] Create a `FunctionalTextInput` component that groups the label and the input together
-- [ ] Create a `ClassTextInput` component to clean up code
+- [X] Create a `ClassTextInput` component to clean up code
 
 Form
 

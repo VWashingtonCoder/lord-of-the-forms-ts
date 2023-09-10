@@ -9,12 +9,12 @@ export function isPhoneValid(phoneNumber: string) {
     return !!phoneNumber.match(regex);
 }
 
-export function containsNumbers(input: string) {
-    const regex = /\d/;
+export function containsOnlyNumbers(input: string) {
+    const regex = /^\d+$/;
     return !!input.match(regex);
 }
 
-export function containsLetters(input: string) {
-    const regex = /[a-zA-Z]/;
+export function containsOnlyLetters(input: string) {
+    const regex = /^[a-zA-Z]+$/;
     return !!input.match(regex);
 }
