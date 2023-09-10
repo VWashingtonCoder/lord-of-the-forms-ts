@@ -3,7 +3,11 @@ import { ErrorMessage } from "../ErrorMessage";
 import { ClassTextInput } from "./components/ClassTextInput";
 import { ClassPhoneInput } from "./components/ClassPhoneInput";
 import { UserInformation, StringObject } from "../types";
-import { containsOnlyNumbers, containsOnlyLetters } from "../utils/validations";
+import {
+  validateFormValue,
+  containsOnlyNumbers,
+  containsOnlyLetters,
+} from "../utils/validations";
 
 type FormProps = {
   updateUser: (newUser: UserInformation) => void;
@@ -19,7 +23,7 @@ type FormState = {
     city: string;
   };
   phoneValues: PhoneValues;
-  errors: StringObject | null;
+  errors: StringObject;
 };
 
 const textInputs = [
@@ -57,7 +61,7 @@ export class ClassForm extends Component<FormProps, FormState> {
       city: "",
     },
     phoneValues: ["", "", "", ""],
-    errors: null,
+    errors: {},
   };
 
   ref1 = createRef<HTMLInputElement>();
@@ -73,8 +77,14 @@ export class ClassForm extends Component<FormProps, FormState> {
   ];
 
   changeTextValues = (key: string, value: string) => {
-    if (key !== "email" && !containsOnlyLetters(value)) {
+    const valid = validateFormValue(key, value) === "";
+
+    if (key !== "email" && !containsOnlyLetters(value) && value.length > 0) {
       return;
+    } else if (this.state.errors[key] !== undefined && valid) {
+      const errors = { ...this.state.errors };
+      delete errors[key];
+      this.setState({ errors });
     }
 
     this.setState((prevState) => ({
@@ -92,31 +102,78 @@ export class ClassForm extends Component<FormProps, FormState> {
       const currentMaxLength = lengths[index];
       const nextInput = this.refGroup[index + 1];
       const previousInput = this.refGroup[index - 1];
-
       const shouldFocusNextInput =
         value.length === currentMaxLength && nextInput?.current;
       const shouldFocusPreviousInput =
         value.length === 0 && previousInput?.current;
-
-      console.log("shouldFocusPreviousInput", shouldFocusPreviousInput);
       const newPhoneValues: PhoneValues = [...this.state.phoneValues];
       newPhoneValues[index] = value;
+      const valid = validateFormValue("phone", newPhoneValues.join("-")) === "";
+
       if (!containsOnlyNumbers(value) && value.length > 0) {
         return;
       } else if (shouldFocusNextInput) {
         nextInput.current.focus();
       } else if (shouldFocusPreviousInput) {
         previousInput.current.focus();
+      } else if (this.state.errors.phone !== undefined && valid) {
+        const errors = { ...this.state.errors };
+        delete errors.phone;
+        this.setState({ errors });
       }
 
       this.setState({ phoneValues: newPhoneValues });
     };
 
+  // submitForm Function
+  submitForm = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log("submitting form");
+    const { textValues, phoneValues } = this.state;
+    const { updateUser } = this.props;
+    const errors: StringObject = {};
+
+    // Check if all text inputs are filled out
+    textInputs.forEach((input) => {
+      const { key } = input;
+      const value = textValues[key];
+      const error = validateFormValue(key, value);
+      if (error) errors[key] = error;
+    });
+
+    // Check if all phone inputs are filled out
+    const phoneError = validateFormValue("phone", phoneValues.join("-"));
+    if (phoneError) errors.phone = phoneError;
+
+    // If there are no errors, update user
+    if (Object.keys(errors).length === 0) {
+      updateUser({
+        firstName: textValues.firstName,
+        lastName: textValues.lastName,
+        email: textValues.email,
+        city: textValues.city,
+        phone: phoneValues.join(""),
+      });
+      this.setState({
+        textValues: {
+          firstName: "",
+          lastName: "",
+          email: "",
+          city: "",
+        },
+        phoneValues: ["", "", "", ""],
+      });
+    } else alert("Bad Inputs");
+
+    this.setState({ errors });
+  };
+
   render() {
     const { textValues, phoneValues, errors } = this.state;
+  
 
     return (
-      <form>
+      <form onSubmit={this.submitForm}>
         <u>
           <h3>User Information Form</h3>
         </u>
@@ -130,7 +187,10 @@ export class ClassForm extends Component<FormProps, FormState> {
               value={textValues[input.key]}
               onChange={this.changeTextValues}
             />
-            <ErrorMessage message={errorMessages[input.key]} show={true} />
+            <ErrorMessage
+              message={errors[input.key]}
+              show={errors[input.key] !== undefined}
+            />
           </>
         ))}
 
@@ -150,7 +210,10 @@ export class ClassForm extends Component<FormProps, FormState> {
           </div>
         </div>
 
-        <ErrorMessage message={errorMessages.phone} show={true} />
+        <ErrorMessage
+          message={errors.phone}
+          show={errors.phone !== undefined}
+        />
 
         <input type="submit" value="Submit" />
       </form>
