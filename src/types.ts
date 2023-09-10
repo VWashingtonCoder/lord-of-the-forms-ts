@@ -6,6 +6,7 @@ export type UserInformation = {
     phone: string;
 }
 
+
 export type StringObject = {
     [key: string]: string;
 }

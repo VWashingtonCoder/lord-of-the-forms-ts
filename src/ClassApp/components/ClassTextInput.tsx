@@ -13,8 +13,10 @@ export class ClassTextInput extends Component<TextInputProps> {
     const { name, label, placeholder, value, onChange } = this.props;
     return (
       <div className="input-wrap">
-        <label>{label}:</label>
+        <label htmlFor={name}>{label}:</label>
         <input
+          id={name}
+          type="text"
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(name, e.target.value)}

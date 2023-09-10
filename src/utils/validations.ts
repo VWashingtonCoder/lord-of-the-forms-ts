@@ -13,3 +13,8 @@ export function containsNumbers(input: string) {
     const regex = /\d/;
     return !!input.match(regex);
 }
+
+export function containsLetters(input: string) {
+    const regex = /[a-zA-Z]/;
+    return !!input.match(regex);
+}
