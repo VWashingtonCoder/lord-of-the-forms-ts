@@ -8,7 +8,6 @@ import {
   containsOnlyNumbers,
   containsOnlyLetters,
 } from "../utils/validations";
-import { formatPhoneNumber } from "../utils/transformations";
 
 type FormProps = {
   updateUser: (newUser: UserInformation) => void;
@@ -44,14 +43,6 @@ const phoneInputs = [
   "phone-input-3",
   "phone-input-4",
 ];
-
-const errorMessages: StringObject = {
-  firstName: "First name must be at least 2 characters long",
-  lastName: "Last name must be at least 2 characters long",
-  email: "Email is Invalid",
-  city: "State is Invalid",
-  phone: "Invalid Phone Number",
-};
 
 export class ClassForm extends Component<FormProps, FormState> {
   state: FormState = {
@@ -108,8 +99,7 @@ export class ClassForm extends Component<FormProps, FormState> {
         value.length === 0 && previousInput?.current;
       const newPhoneValues: PhoneValues = [...this.state.phoneValues];
       newPhoneValues[index] = value;
-      const formattedPhone = formatPhoneNumber(newPhoneValues.join(""));
-      const valid = validateFormValue("phone", formattedPhone) === "";
+      const valid = validateFormValue("phone", newPhoneValues.join("")) === "";
 
       if (!containsOnlyNumbers(value) && value.length > 0) {
         return;
@@ -139,8 +129,8 @@ export class ClassForm extends Component<FormProps, FormState> {
       if (error) errors[key] = error;
     });
 
-    const formattedPhone = formatPhoneNumber(phoneValues.join(""));
-    const phoneError = validateFormValue("phone", formattedPhone);
+    const phoneString = phoneValues.join("");
+    const phoneError = validateFormValue("phone", phoneString);
     if (phoneError) errors.phone = phoneError;
 
     if (Object.keys(errors).length === 0) {
@@ -149,8 +139,9 @@ export class ClassForm extends Component<FormProps, FormState> {
         lastName: textValues.lastName,
         email: textValues.email,
         city: textValues.city,
-        phone: formattedPhone,
+        phone: phoneString,
       });
+
       this.setState({
         textValues: {
           firstName: "",

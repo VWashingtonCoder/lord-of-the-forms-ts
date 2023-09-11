@@ -14,8 +14,7 @@ export function isCityValid(city: string) {
 }
 
 export function isPhoneValid(phoneNumber: string) {
-  const regex =
-    /^\(?([0-9]{2})\)?[-. ]?([0-9]{2})[-. ]?([0-9]{2})[-. ]?([0-9]{1})$/;
+  const regex = /^[0-9]{7}$/;
   return !!phoneNumber.match(regex);
 }
 
