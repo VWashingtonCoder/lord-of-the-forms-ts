@@ -8,6 +8,7 @@ import {
   containsOnlyNumbers,
   containsOnlyLetters,
 } from "../utils/validations";
+import { formatPhoneNumber } from "../utils/transformations";
 
 type FormProps = {
   updateUser: (newUser: UserInformation) => void;
@@ -68,7 +69,6 @@ export class ClassForm extends Component<FormProps, FormState> {
   ref2 = createRef<HTMLInputElement>();
   ref3 = createRef<HTMLInputElement>();
   ref4 = createRef<HTMLInputElement>();
-
   refGroup: React.RefObject<HTMLInputElement>[] = [
     this.ref1,
     this.ref2,
@@ -108,7 +108,8 @@ export class ClassForm extends Component<FormProps, FormState> {
         value.length === 0 && previousInput?.current;
       const newPhoneValues: PhoneValues = [...this.state.phoneValues];
       newPhoneValues[index] = value;
-      const valid = validateFormValue("phone", newPhoneValues.join("-")) === "";
+      const formattedPhone = formatPhoneNumber(newPhoneValues.join(""));
+      const valid = validateFormValue("phone", formattedPhone) === "";
 
       if (!containsOnlyNumbers(value) && value.length > 0) {
         return;
@@ -125,15 +126,12 @@ export class ClassForm extends Component<FormProps, FormState> {
       this.setState({ phoneValues: newPhoneValues });
     };
 
-  // submitForm Function
   submitForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("submitting form");
     const { textValues, phoneValues } = this.state;
     const { updateUser } = this.props;
     const errors: StringObject = {};
 
-    // Check if all text inputs are filled out
     textInputs.forEach((input) => {
       const { key } = input;
       const value = textValues[key];
@@ -141,18 +139,17 @@ export class ClassForm extends Component<FormProps, FormState> {
       if (error) errors[key] = error;
     });
 
-    // Check if all phone inputs are filled out
-    const phoneError = validateFormValue("phone", phoneValues.join("-"));
+    const formattedPhone = formatPhoneNumber(phoneValues.join(""));
+    const phoneError = validateFormValue("phone", formattedPhone);
     if (phoneError) errors.phone = phoneError;
 
-    // If there are no errors, update user
     if (Object.keys(errors).length === 0) {
       updateUser({
         firstName: textValues.firstName,
         lastName: textValues.lastName,
         email: textValues.email,
         city: textValues.city,
-        phone: phoneValues.join(""),
+        phone: formattedPhone,
       });
       this.setState({
         textValues: {
@@ -170,7 +167,6 @@ export class ClassForm extends Component<FormProps, FormState> {
 
   render() {
     const { textValues, phoneValues, errors } = this.state;
-  
 
     return (
       <form onSubmit={this.submitForm}>
