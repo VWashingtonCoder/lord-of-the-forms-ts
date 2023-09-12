@@ -1,12 +1,6 @@
 import { Component } from "react";
+import { TextInputProps } from "../types";
 
-type TextInputProps = {
-  name: string;
-  placeholder: string;
-  label: string;
-  value: string;
-  onChange: (key: string, value: string) => void;
-};
 
 export class ClassTextInput extends Component<TextInputProps> {
   render() {
