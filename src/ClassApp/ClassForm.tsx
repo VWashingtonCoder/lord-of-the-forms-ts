@@ -1,58 +1,25 @@
 import { Component, createRef } from "react";
 import { ErrorMessage } from "../ErrorMessage";
-import { ClassTextInput } from "./components/ClassTextInput";
-import { ClassPhoneInput } from "./components/ClassPhoneInput";
-import { UserInformation, StringObject } from "../types";
+import { ClassTextInput } from "../components/ClassTextInput";
+import { ClassPhoneInput } from "../components/ClassPhoneInput";
+import { StringObject, TextValues, PhoneValues, FormProps } from "../types";
+import { textInputs, phoneInputs, initFormValues } from "../utils/constants";
 import {
   validateFormValue,
   containsOnlyNumbers,
   containsOnlyLetters,
 } from "../utils/validations";
 
-type FormProps = {
-  updateUser: (newUser: UserInformation) => void;
-};
-
-type PhoneValues = [string, string, string, string];
-
 type FormState = {
-  textValues: {
-    [firstName: string]: string;
-    lastName: string;
-    email: string;
-    city: string;
-  };
+  textValues: TextValues;
   phoneValues: PhoneValues;
   errors: StringObject;
 };
 
-const textInputs = [
-  { key: "firstName", label: "First Name", placeholder: "Bilbo" },
-  { key: "lastName", label: "Last Name", placeholder: "Baggins" },
-  {
-    key: "email",
-    label: "Email",
-    placeholder: "bilbo-baggins@adventurehobbits.net",
-  },
-  { key: "city", label: "City", placeholder: "Hobbiton" },
-];
-
-const phoneInputs = [
-  "phone-input-1",
-  "phone-input-2",
-  "phone-input-3",
-  "phone-input-4",
-];
-
 export class ClassForm extends Component<FormProps, FormState> {
   state: FormState = {
-    textValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      city: "",
-    },
-    phoneValues: ["", "", "", ""],
+    textValues: initFormValues.text,
+    phoneValues: initFormValues.phone as PhoneValues,
     errors: {},
   };
 
@@ -93,28 +60,41 @@ export class ClassForm extends Component<FormProps, FormState> {
       const currentMaxLength = lengths[index];
       const nextInput = this.refGroup[index + 1];
       const previousInput = this.refGroup[index - 1];
-      const shouldFocusNextInput =
-        value.length === currentMaxLength && nextInput?.current;
-      const shouldFocusPreviousInput =
-        value.length === 0 && previousInput?.current;
-      const newPhoneValues: PhoneValues = [...this.state.phoneValues];
-      newPhoneValues[index] = value;
-      const valid = validateFormValue("phone", newPhoneValues.join("")) === "";
 
-      if (!containsOnlyNumbers(value) && value.length > 0) {
-        return;
-      } else if (shouldFocusNextInput) {
-        nextInput.current.focus();
-      } else if (shouldFocusPreviousInput) {
-        previousInput.current.focus();
-      } else if (this.state.errors.phone !== undefined && valid) {
-        const errors = { ...this.state.errors };
-        delete errors.phone;
-        this.setState({ errors });
+      if (containsOnlyNumbers(value) && value.length <= currentMaxLength) {
+        const newPhoneValues: PhoneValues = [...this.state.phoneValues];
+        newPhoneValues[index] = value;
+
+        if (value.length === currentMaxLength && nextInput) {
+          nextInput.current?.focus();
+        } else if (value.length === 0 && previousInput) {
+          previousInput.current?.focus();
+        }
+
+        if (
+          this.state.errors.phone !== undefined &&
+          validateFormValue("phone", newPhoneValues.join("")) === ""
+        ) {
+          const errors = { ...this.state.errors };
+          delete errors.phone;
+          this.setState({ errors });
+        }
+
+        this.setState({ phoneValues: newPhoneValues });
       }
-
-      this.setState({ phoneValues: newPhoneValues });
     };
+
+    resetForm = () => {
+      this.setState({
+        textValues: {
+          firstName: "",
+          lastName: "",
+          email: "",
+          city: "",
+        },
+        phoneValues: ["", "", "", ""],
+      });
+    }
 
   submitForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -133,12 +113,13 @@ export class ClassForm extends Component<FormProps, FormState> {
     const phoneError = validateFormValue("phone", phoneString);
     if (phoneError) errors.phone = phoneError;
 
-    if (Object.keys(errors).length === 0) {
+    if (Object.keys(errors).length > 0) {
+      alert("Bad Inputs");
+
+      this.setState({ errors });
+    } else {
       updateUser({
-        firstName: textValues.firstName,
-        lastName: textValues.lastName,
-        email: textValues.email,
-        city: textValues.city,
+        ...textValues,
         phone: phoneString,
       });
 
@@ -151,9 +132,7 @@ export class ClassForm extends Component<FormProps, FormState> {
         },
         phoneValues: ["", "", "", ""],
       });
-    } else alert("Bad Inputs");
-
-    this.setState({ errors });
+    }
   };
 
   render() {
