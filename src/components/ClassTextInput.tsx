@@ -1,7 +1,6 @@
 import { Component } from "react";
 import { TextInputProps } from "../types";
 
-
 export class ClassTextInput extends Component<TextInputProps> {
   render() {
     const { name, label, placeholder, value, onChange } = this.props;

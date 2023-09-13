@@ -61,14 +61,19 @@ export class ClassForm extends Component<FormProps, FormState> {
       const nextInput = this.refGroup[index + 1];
       const previousInput = this.refGroup[index - 1];
 
-      if (containsOnlyNumbers(value) && value.length <= currentMaxLength) {
+      console.log(value);
+
+      if (
+        (containsOnlyNumbers(value) && value.length <= currentMaxLength) ||
+        value === ""
+      ) {
         const newPhoneValues: PhoneValues = [...this.state.phoneValues];
         newPhoneValues[index] = value;
 
-        if (value.length === currentMaxLength && nextInput) {
-          nextInput.current?.focus();
-        } else if (value.length === 0 && previousInput) {
-          previousInput.current?.focus();
+        if (value.length === currentMaxLength && nextInput?.current) {
+          nextInput.current.focus();
+        } else if (value.length === 0 && previousInput?.current) {
+          previousInput.current.focus();
         }
 
         if (
@@ -84,17 +89,17 @@ export class ClassForm extends Component<FormProps, FormState> {
       }
     };
 
-    resetForm = () => {
-      this.setState({
-        textValues: {
-          firstName: "",
-          lastName: "",
-          email: "",
-          city: "",
-        },
-        phoneValues: ["", "", "", ""],
-      });
-    }
+  resetForm = () => {
+    this.setState({
+      textValues: {
+        firstName: "",
+        lastName: "",
+        email: "",
+        city: "",
+      },
+      phoneValues: ["", "", "", ""],
+    });
+  };
 
   submitForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
