@@ -2,13 +2,22 @@ import { useState, createRef } from "react";
 import { ErrorMessage } from "../ErrorMessage";
 import { FunctionalTextInput } from "../components/FunctionalTextInput";
 import { FunctionalPhoneInput } from "../components/FunctionalPhoneInput";
-import { StringObject, TextValues, PhoneValues, FormProps } from "../types";
+import {
+  UserInformation,
+  StringObject,
+  TextValues,
+  PhoneValues,
+} from "../types";
 import { textInputs, phoneInputs, initFormValues } from "../utils/constants";
 import {
   validateFormValue,
   containsOnlyNumbers,
   containsOnlyLetters,
 } from "../utils/validations";
+
+type FormProps = {
+  updateUser: (newUser: UserInformation) => void;
+};
 
 export const FunctionalForm = ({ updateUser }: FormProps) => {
   const [textValues, setTextValues] = useState({

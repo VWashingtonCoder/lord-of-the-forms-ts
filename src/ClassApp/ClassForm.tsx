@@ -2,13 +2,22 @@ import { Component, createRef } from "react";
 import { ErrorMessage } from "../ErrorMessage";
 import { ClassTextInput } from "../components/ClassTextInput";
 import { ClassPhoneInput } from "../components/ClassPhoneInput";
-import { StringObject, TextValues, PhoneValues, FormProps } from "../types";
+import {
+  UserInformation,
+  StringObject,
+  TextValues,
+  PhoneValues,
+} from "../types";
 import { textInputs, phoneInputs, initFormValues } from "../utils/constants";
 import {
   validateFormValue,
   containsOnlyNumbers,
   containsOnlyLetters,
 } from "../utils/validations";
+
+type FormProps = {
+  updateUser: (newUser: UserInformation) => void;
+};
 
 type FormState = {
   textValues: TextValues;
@@ -60,8 +69,6 @@ export class ClassForm extends Component<FormProps, FormState> {
       const currentMaxLength = lengths[index];
       const nextInput = this.refGroup[index + 1];
       const previousInput = this.refGroup[index - 1];
-
-      console.log(value);
 
       if (
         (containsOnlyNumbers(value) && value.length <= currentMaxLength) ||

@@ -1,4 +1,10 @@
-import { PhoneInputProps } from "../types";
+type PhoneInputProps = {
+  id: string;
+  idx: number;
+  value: string;
+  onChange: (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+  refGroup: React.RefObject<HTMLInputElement>[] | null;
+};
 
 export const FunctionalPhoneInput = ({
   id,
