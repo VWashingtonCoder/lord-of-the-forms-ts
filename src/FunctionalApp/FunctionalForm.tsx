@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { FunctionalPhoneInput } from "../components/FunctionalPhoneInput";
 import { ErrorMessage } from "../ErrorMessage";
-import { UserInformation, TextValues, PhoneValues } from "../types";
+import { UserInformation } from "../types";
 import {
-  containsOnlyNumbers,
   containsOnlyLetters,
   isEmailValid,
   isCityValid,
@@ -15,46 +14,31 @@ type FormProps = {
   updateUser: (newUser: UserInformation) => void;
 };
 
-type FormState = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  city: string;
-  phone: PhoneValues;
-};
-
-const initFormValues: FormState = {
+const initFormValues: UserInformation = {
   firstName: "",
   lastName: "",
   email: "",
   city: "",
-  phone: ["", "", "", ""],
+  phone: "",
 };
 
 export const FunctionalForm = ({ updateUser }: FormProps) => {
   const [formValues, setFormValues] = useState(initFormValues);
   const { firstName, lastName, email, city, phone } = formValues;
-  const formSubmitted = false;
-  const firstNameErrorMessage =
-    firstName.length < 2 && formSubmitted
-      ? "First name must be at least 2 characters long"
-      : "";
-  const lastNameErrorMessage =
-    lastName.length < 2 && formSubmitted
-      ? "Last name must be at least 2 characters long"
-      : "";
-  const emailErrorMessage =
-    isEmailValid(email) && formSubmitted ? "Email is Invalid" : "";
-  const cityErrorMessage =
-    isCityValid(city) && formSubmitted ? "State is Invalid" : "";
-  const phoneErrorMessage =
-    isPhoneValid(phone.join("")) && formSubmitted ? "Invalid Phone Number" : "";
-
-  // const ref1 = createRef<HTMLInputElement>();
-  // const ref2 = createRef<HTMLInputElement>();
-  // const ref3 = createRef<HTMLInputElement>();
-  // const ref4 = createRef<HTMLInputElement>();
-  // const refGroup = [ref1, ref2, ref3, ref4];
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const errors = {
+    firstName:
+      firstName.length < 2 && formSubmitted
+        ? "First name must be at least 2 characters long"
+        : "",
+    lastName:
+      lastName.length < 2 && formSubmitted
+        ? "Last name must be at least 2 characters long"
+        : "",
+    email: !isEmailValid(email) && formSubmitted ? "Email is Invalid" : "",
+    city: !isCityValid(city) && formSubmitted ? "State is Invalid" : "",
+    phone: !isPhoneValid(phone) && formSubmitted ? "Invalid Phone Number" : "",
+  };
 
   const changeFormValues = (key: string, value: string) => {
     if (key !== "email" && key !== "phone")
@@ -63,80 +47,39 @@ export const FunctionalForm = ({ updateUser }: FormProps) => {
     setFormValues({ ...formValues, [key]: value });
   };
 
-  // const changePhoneValues =
-  //   (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
-  //     const { value } = e.target;
-  //     const lengths = [2, 2, 2, 1];
-  //     const currentMaxLength = lengths[index];
-  //     const nextInput = refGroup[index + 1];
-  //     const previousInput = refGroup[index - 1];
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    let validForm = true;
 
-  //     if (
-  //       (containsOnlyNumbers(value) && value.length <= currentMaxLength) ||
-  //       value === ""
-  //     ) {
-  //       const newPhoneValues: PhoneValues = [...phoneValues];
-  //       newPhoneValues[index] = value;
+    Object.entries(formValues).forEach(([key, value]) => {
+      if (value.length === 0) {
+        validForm = false;
+      } else if (
+        (key === "firstName" || key === "lastName") &&
+        value.length < 2
+      ) {
+        validForm = false;
+      } else if (key === "email" && !isEmailValid(value)) {
+        validForm = false;
+      } else if (key === "city" && !isCityValid(value)) {
+        validForm = false;
+      } else if (key === "phone" && !isPhoneValid(value)) {
+        validForm = false;
+      }
+    });
 
-  //       if (value.length === currentMaxLength && nextInput) {
-  //         nextInput.current?.focus();
-  //       } else if (value.length === 0 && previousInput) {
-  //         previousInput.current?.focus();
-  //       }
-
-  //       if (
-  //         errors.phone !== undefined &&
-  //         validateFormValue("phone", newPhoneValues.join("")) === ""
-  //       ) {
-  //         const newErrors = { ...errors };
-  //         delete newErrors.phone;
-  //         setErrors(newErrors);
-  //       }
-
-  //       setPhoneValues(newPhoneValues);
-  //     }
-  //   };
-
-  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   const newErrors: Record<string, string> = {};
-
-  //   textInputs.forEach((input) => {
-  //     const { key } = input;
-  //     const value = textValues[key];
-  //     const error = validateFormValue(key, value);
-  //     if (error !== "") {
-  //       newErrors[key] = error;
-  //     }
-  //   });
-
-  //   const phoneValue = phoneValues.join("");
-  //   const phoneError = validateFormValue("phone", phoneValue);
-  //   if (phoneError !== "") {
-  //     newErrors.phone = phoneError;
-  //   }
-
-  //   if (Object.keys(newErrors).length > 0) {
-  //     alert("Please fix the errors in the form");
-  //     setErrors(newErrors);
-  //   } else {
-  //     const { firstName, lastName, email, city } = textValues;
-
-  //     updateUser({
-  //       firstName,
-  //       lastName,
-  //       email,
-  //       city,
-  //       phone: phoneValue,
-  //     });
-  //     setTextValues(initFormValues.text);
-  //     setPhoneValues(initFormValues.phone as PhoneValues);
-  //     setErrors({});
-  //   }
-  // };
+    if (validForm) {
+      updateUser(formValues);
+      setFormValues(initFormValues);
+      setFormSubmitted(false);
+    } else {
+      alert("Bad Inputs");
+      setFormSubmitted(true);
+    }
+  };
 
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <u>
         <h3>User Information Form</h3>
       </u>
@@ -154,10 +97,7 @@ export const FunctionalForm = ({ updateUser }: FormProps) => {
           },
         }}
       />
-      <ErrorMessage
-        message={firstNameErrorMessage}
-        show={firstNameErrorMessage !== ""}
-      />
+      <ErrorMessage message={errors.firstName} show={errors.firstName !== ""} />
 
       {/* last name input */}
       <FunctionalTextInput
@@ -172,10 +112,7 @@ export const FunctionalForm = ({ updateUser }: FormProps) => {
           },
         }}
       />
-      <ErrorMessage
-        message={lastNameErrorMessage}
-        show={lastNameErrorMessage !== ""}
-      />
+      <ErrorMessage message={errors.lastName} show={errors.lastName !== ""} />
 
       {/* Email Input */}
       <FunctionalTextInput
@@ -190,10 +127,7 @@ export const FunctionalForm = ({ updateUser }: FormProps) => {
           },
         }}
       />
-      <ErrorMessage
-        message={emailErrorMessage}
-        show={emailErrorMessage !== ""}
-      />
+      <ErrorMessage message={errors.email} show={errors.email !== ""} />
 
       {/* City Input */}
       <FunctionalTextInput
@@ -203,30 +137,17 @@ export const FunctionalForm = ({ updateUser }: FormProps) => {
           id: "city",
           placeholder: "Hobbiton",
           value: city,
+          list: "cities",
           onChange: (e) => {
             changeFormValues("city", e.target.value);
           },
         }}
       />
-      <ErrorMessage message={cityErrorMessage} show={cityErrorMessage !== ""} />
+      <ErrorMessage message={errors.city} show={errors.city !== ""} />
 
-      {/* <div className="input-wrap">
-        <label htmlFor="phone">Phone:</label>
-        <div id="phone-input-wrap">
-          {phoneInputs.map((inputId, index) => (
-            <FunctionalPhoneInput
-              key={index}
-              id={inputId}
-              idx={index}
-              value={phoneValues[index]}
-              refGroup={refGroup}
-              onChange={changePhoneValues}
-            />
-          ))}
-        </div>
-      </div> */}
-
-      {/* <ErrorMessage message={errors.phone} show={errors.phone !== undefined} /> */}
+      {/* Phone Input */}
+      <FunctionalPhoneInput setPhoneNumber={changeFormValues} />
+      <ErrorMessage message={errors.phone} show={errors.phone !== ""} />
 
       <input type="submit" value="Submit" />
     </form>
