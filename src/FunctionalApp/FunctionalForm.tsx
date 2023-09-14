@@ -7,6 +7,7 @@ import {
   isEmailValid,
   isCityValid,
   isPhoneValid,
+  validateFormValue
 } from "../utils/validations";
 import { FunctionalTextInput } from "./FunctionalTextInput";
 
@@ -51,21 +52,9 @@ export const FunctionalForm = ({ updateUser }: FormProps) => {
     e.preventDefault();
     let validForm = true;
 
-    Object.entries(formValues).forEach(([key, value]) => {
-      if (value.length === 0) {
-        validForm = false;
-      } else if (
-        (key === "firstName" || key === "lastName") &&
-        value.length < 2
-      ) {
-        validForm = false;
-      } else if (key === "email" && !isEmailValid(value)) {
-        validForm = false;
-      } else if (key === "city" && !isCityValid(value)) {
-        validForm = false;
-      } else if (key === "phone" && !isPhoneValid(value)) {
-        validForm = false;
-      }
+    Object.entries(formValues).every(([key, value]) => {
+      validForm = validateFormValue(key, value);
+      return validForm;
     });
 
     if (validForm) {
