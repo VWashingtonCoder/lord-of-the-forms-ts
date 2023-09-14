@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FunctionalPhoneInput } from "../components/FunctionalPhoneInput";
+import { FunctionalPhoneInput } from "./FunctionalPhoneInput";
 import { ErrorMessage } from "../ErrorMessage";
 import { UserInformation } from "../types";
 import {
@@ -8,7 +8,7 @@ import {
   isCityValid,
   isPhoneValid,
 } from "../utils/validations";
-import { FunctionalTextInput } from "../components/FunctionalTextInput";
+import { FunctionalTextInput } from "./FunctionalTextInput";
 
 type FormProps = {
   updateUser: (newUser: UserInformation) => void;
