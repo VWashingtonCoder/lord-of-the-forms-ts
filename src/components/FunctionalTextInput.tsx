@@ -1,28 +1,20 @@
+import { ComponentProps } from "react";
+
 type TextInputProps = {
-  name: string;
-  placeholder: string;
   label: string;
-  value: string;
-  onChange: (key: string, value: string) => void;
+  labelFor: string;
+  inputProps: ComponentProps<"input">;
 };
 
 export const FunctionalTextInput = ({
-  name,
   label,
-  placeholder,
-  value,
-  onChange,
+  labelFor,
+  inputProps,
 }: TextInputProps) => {
   return (
     <div className="input-wrap">
-      <label htmlFor={name}>{label}:</label>
-      <input
-        id={name}
-        type="text"
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(name, e.target.value)}
-      />
+      <label htmlFor={labelFor}>{label}:</label>
+      <input {...inputProps} />
     </div>
   );
 };

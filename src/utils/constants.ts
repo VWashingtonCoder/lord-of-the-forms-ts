@@ -7,7 +7,7 @@ export const textInputs = [
     placeholder: "bilbo-baggins@adventurehobbits.net",
   },
   { key: "city", label: "City", placeholder: "Hobbiton" },
-];
+] as const;
 
 export const phoneInputs = [
   "phone-input-1",
@@ -25,4 +25,12 @@ export const initFormValues = {
     phone: "",
   },
   phone: ["", "", "", ""],
+};
+
+export const errorMessages = {
+  firstName: "First name must be at least 2 characters long",
+  lastName: "Last name must be at least 2 characters long",
+  email: "Email is Invalid",
+  city: "State is Invalid",
+  phone: "Invalid Phone Number",
 };
