@@ -1,6 +1,5 @@
 import { capitalize } from "./transformations";
 import { allCities } from "./all-cities";
-import { StringObject } from "../types";
 
 export function isEmailValid(emailAddress: string) {
   // eslint-disable-next-line no-useless-escape
@@ -11,7 +10,7 @@ export function isEmailValid(emailAddress: string) {
 export function isCityValid(city: string) {
   if (city.length !== 0) {
     const capitalizedCity = capitalize(city);
-  return allCities.includes(capitalizedCity);
+    return allCities.includes(capitalizedCity);
   } else return false;
 }
 
@@ -31,26 +30,19 @@ export function containsOnlyLetters(input: string) {
 }
 
 export function validateFormValue(key: string, value: string) {
-  const errorMessages: StringObject = {
-    firstName: "First name must be at least 2 characters long",
-    lastName: "Last name must be at least 2 characters long",
-    email: "Email is Invalid",
-    city: "State is Invalid",
-    phone: "Invalid Phone Number",
-  };
-  let errorMessage = "";
+  let valid = true;
 
   if (value.length === 0) {
-    errorMessage = errorMessages[key];
+    valid = false;
   } else if ((key === "firstName" || key === "lastName") && value.length < 2) {
-    errorMessage = errorMessages[key];
+    valid = false;
   } else if (key === "email" && !isEmailValid(value)) {
-    errorMessage = errorMessages.email;
+    valid = false;
   } else if (key === "city" && !isCityValid(value)) {
-    errorMessage = errorMessages.city;
+    valid = false;
   } else if (key === "phone" && !isPhoneValid(value)) {
-    errorMessage = errorMessages.phone;
+    valid = false;
   }
 
-  return errorMessage;
+  return valid;
 }

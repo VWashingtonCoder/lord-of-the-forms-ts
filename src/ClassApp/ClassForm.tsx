@@ -1,17 +1,13 @@
-import { Component, createRef } from "react";
+import { Component } from "react";
 import { ErrorMessage } from "../ErrorMessage";
-import { ClassTextInput } from "../components/ClassTextInput";
-import { ClassPhoneInput } from "../components/ClassPhoneInput";
-import {
-  UserInformation,
-  StringObject,
-  TextValues,
-  PhoneValues,
-} from "../types";
-import { textInputs, phoneInputs, initFormValues } from "../utils/constants";
+import { ClassTextInput } from "./ClassTextInput";
+import { ClassPhoneInput } from "./ClassPhoneInput";
+import { UserInformation } from "../types";
 import {
   validateFormValue,
-  containsOnlyNumbers,
+  isEmailValid,
+  isCityValid,
+  isPhoneValid,
   containsOnlyLetters,
 } from "../utils/validations";
 
@@ -20,178 +16,120 @@ type FormProps = {
 };
 
 type FormState = {
-  textValues: TextValues;
-  phoneValues: PhoneValues;
-  errors: StringObject;
+  formValues: UserInformation;
+  formSubmitted: boolean;
+};
+
+const initFormValues: UserInformation = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  city: "",
+  phone: "",
 };
 
 export class ClassForm extends Component<FormProps, FormState> {
   state: FormState = {
-    textValues: initFormValues.text,
-    phoneValues: initFormValues.phone as PhoneValues,
-    errors: {},
+    formValues: initFormValues,
+    formSubmitted: false,
   };
 
-  ref1 = createRef<HTMLInputElement>();
-  ref2 = createRef<HTMLInputElement>();
-  ref3 = createRef<HTMLInputElement>();
-  ref4 = createRef<HTMLInputElement>();
-  refGroup: React.RefObject<HTMLInputElement>[] = [
-    this.ref1,
-    this.ref2,
-    this.ref3,
-    this.ref4,
-  ];
-
-  changeTextValues = (key: string, value: string) => {
-    const valid = validateFormValue(key, value) === "";
-
-    if (key !== "email" && !containsOnlyLetters(value) && value.length > 0) {
-      return;
-    } else if (this.state.errors[key] !== undefined && valid) {
-      const errors = { ...this.state.errors };
-      delete errors[key];
-      this.setState({ errors });
-    }
+  changeFormValues = (key: string, value: string) => {
+    if (key !== "email" && key !== "phone")
+      if (!containsOnlyLetters(value) && value.length > 0) return;
 
     this.setState((prevState) => ({
-      textValues: {
-        ...prevState.textValues,
+      formValues: {
+        ...prevState.formValues,
         [key]: value,
       },
     }));
   };
 
-  changePhoneValues =
-    (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { value } = e.target;
-      const lengths = [2, 2, 2, 1];
-      const currentMaxLength = lengths[index];
-      const nextInput = this.refGroup[index + 1];
-      const previousInput = this.refGroup[index - 1];
-
-      if (
-        (containsOnlyNumbers(value) && value.length <= currentMaxLength) ||
-        value === ""
-      ) {
-        const newPhoneValues: PhoneValues = [...this.state.phoneValues];
-        newPhoneValues[index] = value;
-
-        if (value.length === currentMaxLength && nextInput?.current) {
-          nextInput.current.focus();
-        } else if (value.length === 0 && previousInput?.current) {
-          previousInput.current.focus();
-        }
-
-        if (
-          this.state.errors.phone !== undefined &&
-          validateFormValue("phone", newPhoneValues.join("")) === ""
-        ) {
-          const errors = { ...this.state.errors };
-          delete errors.phone;
-          this.setState({ errors });
-        }
-
-        this.setState({ phoneValues: newPhoneValues });
-      }
-    };
-
-  resetForm = () => {
-    this.setState({
-      textValues: {
-        firstName: "",
-        lastName: "",
-        email: "",
-        city: "",
-      },
-      phoneValues: ["", "", "", ""],
-    });
-  };
-
-  submitForm = (e: React.FormEvent<HTMLFormElement>) => {
+  handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const { textValues, phoneValues } = this.state;
-    const { updateUser } = this.props;
-    const errors: StringObject = {};
+    const { formValues } = this.state;
+    let validForm = true;
 
-    textInputs.forEach((input) => {
-      const { key } = input;
-      const value = textValues[key];
-      const error = validateFormValue(key, value);
-      if (error) errors[key] = error;
+    Object.entries(formValues).every(([key, value]) => {
+      validForm = validateFormValue(key, value);
+      return validForm;
     });
 
-    const phoneString = phoneValues.join("");
-    const phoneError = validateFormValue("phone", phoneString);
-    if (phoneError) errors.phone = phoneError;
-
-    if (Object.keys(errors).length > 0) {
-      alert("Bad Inputs");
-
-      this.setState({ errors });
-    } else {
-      updateUser({
-        ...textValues,
-        phone: phoneString,
-      });
-
+    if (validForm) {
+      this.props.updateUser(formValues);
       this.setState({
-        textValues: {
-          firstName: "",
-          lastName: "",
-          email: "",
-          city: "",
-        },
-        phoneValues: ["", "", "", ""],
+        formValues: initFormValues,
+        formSubmitted: false,
       });
+    } else {
+      alert("Bad Inputs");
+      this.setState({ formSubmitted: true });
     }
   };
 
   render() {
-    const { textValues, phoneValues, errors } = this.state;
+    const { formValues, formSubmitted } = this.state;
+    const { firstName, lastName, email, city, phone } = formValues;
+    const errors = {
+      firstName:
+        firstName.length < 2 && formSubmitted
+          ? "First name must be at least 2 characters long"
+          : "",
+      lastName:
+        lastName.length < 2 && formSubmitted
+          ? "Last name must be at least 2 characters long"
+          : "",
+      email: !isEmailValid(email) && formSubmitted ? "Email is Invalid" : "",
+      city: !isCityValid(city) && formSubmitted ? "State is Invalid" : "",
+      phone:
+        !isPhoneValid(phone) && formSubmitted ? "Invalid Phone Number" : "",
+    };
+
+    const textInputs = [
+      { key: "firstName", label: "First Name", placeholder: "Bilbo" },
+      { key: "lastName", label: "Last Name", placeholder: "Baggins" },
+      {
+        key: "email",
+        label: "Email",
+        placeholder: "bilbo-baggins@adventurehobbits.net",
+      },
+      { key: "city", label: "City", placeholder: "Hobbiton" },
+    ] as const;
 
     return (
-      <form onSubmit={this.submitForm}>
+      <form onSubmit={this.handleSubmit}>
         <u>
           <h3>User Information Form</h3>
         </u>
+
         {textInputs.map((input) => (
           <>
             <ClassTextInput
               key={input.key}
-              name={input.key}
               label={input.label}
-              placeholder={input.placeholder}
-              value={textValues[input.key]}
-              onChange={this.changeTextValues}
+              labelFor={input.key}
+              inputProps={{
+                id: input.key,
+                placeholder: input.placeholder,
+                value: formValues[input.key],
+                list: input.key === "city" ? "cities" : undefined,
+                onChange: (e) => {
+                  const { value } = e.target;
+                  this.changeFormValues(input.key, value);
+                },
+              }}
             />
             <ErrorMessage
               message={errors[input.key]}
-              show={errors[input.key] !== undefined}
+              show={errors[input.key] !== ""}
             />
           </>
         ))}
 
-        <div className="input-wrap">
-          <label htmlFor="phone">Phone:</label>
-          <div id="phone-input-wrap">
-            {phoneInputs.map((inputId, idx) => (
-              <ClassPhoneInput
-                key={inputId}
-                id={inputId}
-                idx={idx}
-                value={phoneValues[idx]}
-                onChange={this.changePhoneValues}
-                refGroup={this.refGroup}
-              />
-            ))}
-          </div>
-        </div>
+        <ClassPhoneInput setPhoneNumber={this.changeFormValues} />
 
-        <ErrorMessage
-          message={errors.phone}
-          show={errors.phone !== undefined}
-        />
+        <ErrorMessage message={errors.phone} show={errors.phone !== ""} />
 
         <input type="submit" value="Submit" />
       </form>
